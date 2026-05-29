@@ -3,11 +3,21 @@ import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 
 export const SettingsAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingPos, setSavingPos] = useState(false);
+  const [posMsg, setPosMsg] = useState("");
+  const [posConfig, setPosConfig] = useState({
+    store_online: true,
+    delivery_enabled: true,
+    delivery_fee_cents: 350,
+    min_order_cents: 1500,
+    tax_rate: 0.19,
+  });
   const [msg, setMsg] = useState("");
 
   const [form, setForm] = useState({
@@ -70,10 +80,30 @@ export const SettingsAdmin = () => {
           gallery: parsedGallery
         }));
       }
+      if (settings.pos_config) {
+        setPosConfig((prev: any) => ({ ...prev, ...settings.pos_config }));
+      }
     } catch (e) {
       console.error(e);
     }
     setLoading(false);
+  };
+
+  const savePosConfig = async () => {
+    setSavingPos(true);
+    setPosMsg("");
+    try {
+      await apiFetch("/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pos_config: posConfig }),
+      });
+      setPosMsg("POS settings saved!");
+    } catch (err: any) {
+      setPosMsg("Error: " + err.message);
+    } finally {
+      setSavingPos(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -122,6 +152,58 @@ export const SettingsAdmin = () => {
 
   return (
     <div className="space-y-8 max-w-3xl">
+      {/* POS Settings */}
+      <section className="rounded-lg border border-border/15 p-6 bg-surface/50">
+        <h2 className="font-serif-display text-2xl mb-1">Online Ordering (POS)</h2>
+        <p className="text-sm text-muted-foreground mb-6">Control your online store, delivery, and pricing.</p>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="flex items-center justify-between rounded-md border border-border/15 bg-background p-4">
+            <div>
+              <Label className="font-serif-display">Store Online</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">Allow customers to place orders</p>
+            </div>
+            <Switch
+              checked={posConfig.store_online}
+              onCheckedChange={(v) => setPosConfig((p) => ({ ...p, store_online: v }))}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-md border border-border/15 bg-background p-4">
+            <div>
+              <Label className="font-serif-display">Delivery Enabled</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">Offer delivery option</p>
+            </div>
+            <Switch
+              checked={posConfig.delivery_enabled}
+              onCheckedChange={(v) => setPosConfig((p) => ({ ...p, delivery_enabled: v }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Delivery Fee (€)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={(posConfig.delivery_fee_cents / 100).toFixed(2)}
+              onChange={(e) => setPosConfig((p) => ({ ...p, delivery_fee_cents: Math.round(parseFloat(e.target.value || '0') * 100) }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Minimum Order (€)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={(posConfig.min_order_cents / 100).toFixed(2)}
+              onChange={(e) => setPosConfig((p) => ({ ...p, min_order_cents: Math.round(parseFloat(e.target.value || '0') * 100) }))}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-4 pt-4 mt-4">
+          <Button onClick={savePosConfig} disabled={savingPos} className="bg-emerald text-[#15191a] hover:bg-emerald/90">
+            {savingPos ? "Saving..." : "Save POS Settings"}
+          </Button>
+          {posMsg && <span className={`text-sm ${posMsg.includes("Error") ? "text-destructive" : "text-emerald"}`}>{posMsg}</span>}
+        </div>
+      </section>
+
       <div className="flex justify-between items-center bg-surface/50 p-6 rounded-lg border border-border/15">
         <div>
           <h2 className="font-serif-display text-2xl mb-1">Live Canvas Edit</h2>

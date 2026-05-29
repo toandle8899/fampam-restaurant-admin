@@ -108,7 +108,7 @@ const Nav = () => {
 
   const links = [
     { href: "#reserve", label: t("nav.reserve") },
-    { href: "#delivery", label: t("nav.order") },
+    { href: "/order", label: "Order Online" },
     { href: "#footer", label: t("footer.contact") },
   ];
 

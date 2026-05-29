@@ -9,8 +9,8 @@ binding = "ASSETS"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "fampam-db"
-database_id = "879190b3-c0e1-47db-801d-b59beab1cfc9"
+database_name = "fampam-restaurant-admin-db"
+database_id = "4996a0e1-f22e-4be9-a00e-54128c64a646"
 
 [[r2_buckets]]
 binding = "R2_BUCKET"
@@ -21,6 +21,10 @@ ADMIN_EMAIL = "admin@fampam.de"
 ADMIN_PASSWORD = "Fampam@123"
 # JWT_SECRET = "..." # Set this via Cloudflare Dashboard or .dev.vars
 RESEND_API_KEY = "re_MPRiKKgz_DUAo9zPXNtWXMW1UTHkuCZA1"
+# STRIPE_SECRET_KEY = "sk_test_..." # Set this via Cloudflare Dashboard or .dev.vars
+# STRIPE_WEBHOOK_SECRET = "whsec_..." # Set this via Cloudflare Dashboard or .dev.vars
+# STRIPE_PUBLIC_KEY = "pk_test_..." # Set this via Cloudflare Dashboard or .dev.vars
+DEV_MODE = "true"
 
 [[send_email]]
 name = "SEND_EMAIL"

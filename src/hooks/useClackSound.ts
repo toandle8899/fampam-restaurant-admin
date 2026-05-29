@@ -29,10 +29,12 @@ export const useClackSound = () => {
     const handleHover = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (
-        target.closest('a') || 
-        target.closest('button') || 
-        target.closest('[role="button"]') || 
-        target.closest('[role="tab"]')
+        target.closest && typeof target.closest === 'function' && (
+          target.closest('a') || 
+          target.closest('button') || 
+          target.closest('[role="button"]') || 
+          target.closest('[role="tab"]')
+        )
       ) {
         playClack();
       }

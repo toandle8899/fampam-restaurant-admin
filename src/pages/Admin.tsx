@@ -5,6 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MenuAdmin } from "./admin/MenuAdmin";
 import { SettingsAdmin } from "./admin/SettingsAdmin";
 import { ReservationsAdmin } from "./admin/ReservationsAdmin";
+import { OrdersAdmin } from "./admin/OrdersAdmin";
+import { CustomersAdmin } from "./admin/CustomersAdmin";
+import { InvoicesAdmin } from "./admin/InvoicesAdmin";
 
 const Admin = () => {
   const [loading, setLoading] = useState(true);
@@ -109,13 +112,20 @@ const Admin = () => {
       </header>
       
       <main className="container mx-auto p-4 py-8">
-        <Tabs defaultValue="reservations" className="w-full">
-          <TabsList className="mb-8">
+        <Tabs defaultValue="orders" className="w-full">
+          <TabsList className="mb-8 flex-wrap">
+            <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="reservations">Reservations</TabsTrigger>
             <TabsTrigger value="menu">Menu Items</TabsTrigger>
+            <TabsTrigger value="customers">Customers</TabsTrigger>
+            <TabsTrigger value="invoices">Invoices</TabsTrigger>
             <TabsTrigger value="settings">Site Content & Settings</TabsTrigger>
             <TabsTrigger value="system">System (Raw JSON)</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="orders">
+            <OrdersAdmin />
+          </TabsContent>
 
           <TabsContent value="reservations">
             <ReservationsAdmin />
@@ -123,6 +133,14 @@ const Admin = () => {
 
           <TabsContent value="menu">
             <MenuAdmin />
+          </TabsContent>
+
+          <TabsContent value="customers">
+            <CustomersAdmin />
+          </TabsContent>
+
+          <TabsContent value="invoices">
+            <InvoicesAdmin />
           </TabsContent>
 
           <TabsContent value="settings">

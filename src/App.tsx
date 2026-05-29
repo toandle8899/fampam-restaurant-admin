@@ -14,6 +14,15 @@ const MenuPage = lazy(() => import("./pages/MenuPage.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin.tsx"));
 
+// POS Pages
+const OrderMenu = lazy(() => import("./pages/OrderMenu.tsx"));
+const Checkout = lazy(() => import("./pages/Checkout.tsx"));
+const CustomerAuth = lazy(() => import("./pages/CustomerAuth.tsx"));
+const CustomerDashboard = lazy(() => import("./pages/CustomerDashboard.tsx"));
+const OrderTracking = lazy(() => import("./pages/OrderTracking.tsx"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess.tsx"));
+const MockStripe = lazy(() => import("./pages/MockStripe.tsx"));
+
 export const queryClient = new QueryClient();
 
 const App = () => {
@@ -31,6 +40,16 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/menu" element={<MenuPage />} />
+                
+                {/* POS Routes */}
+                <Route path="/order" element={<OrderMenu />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/account" element={<CustomerAuth />} />
+                <Route path="/dashboard" element={<CustomerDashboard />} />
+                <Route path="/order/success" element={<OrderSuccess />} />
+                <Route path="/order/:id" element={<OrderTracking />} />
+                <Route path="/mock-stripe" element={<MockStripe />} />
+
                 <Route path="/admin/*" element={<Admin />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

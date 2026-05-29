@@ -2,13 +2,24 @@ export const apiFetch = async (url: string, options?: RequestInit) => {
   const res = await fetch(`/api${url}`, options);
   if (!res.ok) {
     let message = 'An error occurred';
+    const text = await res.text();
     try {
-      const err = await res.json();
-      message = err.error || message;
+      if (text) {
+        const err = JSON.parse(text);
+        message = err.error || message;
+      }
     } catch {
-      message = await res.text();
+      message = text || message;
     }
     throw new Error(message);
   }
-  return res.json();
+  
+  // If no content, just return empty object
+  const text = await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text; // fallback if it's returning plain text
+  }
 };

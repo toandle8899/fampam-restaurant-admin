@@ -27,6 +27,7 @@ const LiveEditor = () => {
     if (!isEditing) return;
 
     const handleMouseOver = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest || typeof (e.target as HTMLElement).closest !== 'function') return;
       const target = (e.target as HTMLElement).closest("[data-edit-key]");
       if (target) {
         (target as HTMLElement).style.outline = "2px dashed #10b981";
@@ -35,6 +36,10 @@ const LiveEditor = () => {
     };
 
     const handleMouseOut = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest || typeof (e.target as HTMLElement).closest !== 'function') {
+        setHoveredKey(null);
+        return;
+      }
       const target = (e.target as HTMLElement).closest("[data-edit-key]");
       if (target) {
         (target as HTMLElement).style.outline = "";
@@ -42,6 +47,7 @@ const LiveEditor = () => {
     };
 
     const handleClick = async (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest || typeof (e.target as HTMLElement).closest !== 'function') return;
       const target = (e.target as HTMLElement).closest("[data-edit-key]");
       if (target) {
         e.preventDefault();

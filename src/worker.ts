@@ -18,7 +18,10 @@ type Bindings = {
   FACEBOOK_PAGE_ACCESS_TOKEN?: string;
   ADMIN_MESSENGER_PSID?: string;
   RESEND_API_KEY?: string;
-};
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
+  STRIPE_PUBLIC_KEY?: string;
+  DEV_MODE?: string;};
 
 const app = new Hono<{ Bindings: Bindings }>().basePath('/api');
 
@@ -213,6 +216,95 @@ app.post('/consent', async (c) => {
 
 // Auth endpoints removed - Authentication is now handled by Cloudflare Access at the edge.
 
+// --- POS: Orders & Stripe ---
+app.post('/stripe/create-checkout-session', async (c) => {
+  const body = await c.req.json();
+  const id = crypto.randomUUID();
+  
+  // Get next order number
+  const { results } = await c.env.DB.prepare('UPDATE order_counter SET last_number = last_number + 1 WHERE id = 1 RETURNING last_number').all();
+  const orderNumber = (results[0] as any).last_number;
+
+  await c.env.DB.prepare(`
+    INSERT INTO orders (id, order_number, customer_id, guest_name, guest_email, type, status, items, subtotal_cents, delivery_fee_cents, total_cents, delivery_address, delivery_phone, delivery_notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    id, 
+    orderNumber ?? 0, 
+    body.customer_id ?? null, 
+    body.guest_name ?? null, 
+    body.guest_email ?? null,
+    body.order_type ?? 'pickup', 
+    'received', 
+    JSON.stringify(body.items ?? []), 
+    body.subtotal_cents ?? 0, 
+    body.delivery_fee_cents ?? 0, 
+    body.total_cents ?? 0,
+    body.delivery_address ?? null, 
+    body.delivery_phone ?? null, 
+    body.delivery_notes ?? null
+  ).run();
+
+  // If Stripe is not configured or we are in local dev mock mode, return mock session
+  if (!c.env.STRIPE_SECRET_KEY || c.env.STRIPE_SECRET_KEY === 'mock') {
+    return c.json({ mock: true, orderId: id });
+  }
+  
+  const stripe = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: '2024-11-20.acacia' });
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: body.items.map((item: any) => ({
+      price_data: {
+        currency: 'eur',
+        product_data: { name: `${item.name} ${item.variant ? `(${item.variant})` : ''}`.trim() },
+        unit_amount: item.price_cents,
+      },
+      quantity: item.quantity,
+    })).concat(body.delivery_fee_cents > 0 ? [{
+      price_data: {
+        currency: 'eur',
+        product_data: { name: 'Delivery Fee' },
+        unit_amount: body.delivery_fee_cents,
+      },
+      quantity: 1,
+    }] : []),
+    mode: 'payment',
+    success_url: `${new URL(c.req.url).origin}/order/success?order_id=${id}`,
+    cancel_url: `${new URL(c.req.url).origin}/checkout`,
+    client_reference_id: id,
+    customer_email: body.guest_email || undefined,
+  });
+
+  await c.env.DB.prepare('UPDATE orders SET stripe_session_id = ? WHERE id = ?').bind(session.id, id).run();
+  
+  return c.json({ sessionId: session.id, orderId: id });
+});
+
+app.post('/stripe/mock-success', async (c) => {
+  const { orderId } = await c.req.json();
+  await c.env.DB.prepare("UPDATE orders SET status = 'preparing', paid_at = datetime('now') WHERE id = ?").bind(orderId).run();
+  return c.json({ success: true });
+});
+
+app.get('/orders/my', async (c) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return c.json({ error: 'Unauthorized' }, 401);
+  const token = authHeader.split(' ')[1];
+  try {
+    const payload = await verify(token, c.env.JWT_SECRET || 'secret') as any;
+    const { results } = await c.env.DB.prepare('SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC').bind(payload.customer_id).all();
+    return c.json(results);
+  } catch (err) {
+    return c.json({ error: 'Invalid token' }, 401);
+  }
+});
+
+app.get('/orders/:id', async (c) => {
+  const { results } = await c.env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(c.req.param('id')).all();
+  if (!results.length) return c.json({ error: 'Not found' }, 404);
+  return c.json(results[0]);
+});
+
 // Admin Middleware
 app.use('/admin/*', async (c, next) => {
   // Cloudflare Access injects this header when a user successfully authenticates
@@ -220,9 +312,10 @@ app.use('/admin/*', async (c, next) => {
   
   const url = new URL(c.req.url);
   const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  const isDevMode = c.env.DEV_MODE === 'true';
 
-  // If not localhost and no CF Access header, block the request to ensure CF Access is configured
-  if (!cfAccessEmail && !isLocalhost) {
+  // If not localhost, no CF Access header, and DEV_MODE is not true, block the request
+  if (!cfAccessEmail && !isLocalhost && !isDevMode) {
     return c.json({ error: 'Unauthorized. Cloudflare Access login required.' }, 401);
   }
   
@@ -302,6 +395,20 @@ app.post('/admin/reservations/:id/reply', async (c) => {
   }
 
   return c.json({ success: true, email_sent, email_error });
+});
+
+// Admin: Orders
+app.get('/admin/orders', async (c) => {
+  const { results } = await c.env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
+  return c.json(results);
+});
+
+// Admin: Update Order Status
+app.post('/admin/orders/:id/status', async (c) => {
+  const id = c.req.param('id');
+  const { status } = await c.req.json();
+  await c.env.DB.prepare('UPDATE orders SET status = ? WHERE id = ?').bind(status, id).run();
+  return c.json({ success: true });
 });
 
 // Admin: Manage Dishes

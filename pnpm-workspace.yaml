@@ -4,5 +4,6 @@ packages:
 allowBuilds:
   "@swc/core": true
   "esbuild": true
+  puppeteer: set this to true or false
   "sharp": true
   "workerd": true

@@ -88,10 +88,8 @@ export const useMenu = () => {
           .filter((dish: any) => dish.collection_id === col.id)
           .map((dish: any) => {
             const imgConfig = (menuImages as any)[dish.id];
-            // 20% chance to show an image by default if not explicitly configured in CMS
-            const isRandomlySelected = dish.id.charCodeAt(dish.id.length - 1) % 5 === 0;
-            const showImage = imgConfig ? imgConfig.show_image : isRandomlySelected;
-            const imageUrl = imgConfig ? imgConfig.image_url : "";
+            const imageUrl = imgConfig ? imgConfig.image_url : (dish.sticker_url || "");
+            const showImage = imgConfig ? imgConfig.show_image : !!imageUrl;
 
             const translations: any = dish.translations || {};
             return {
