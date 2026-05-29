@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 40 40" fill="none">
+  <g transform="translate(1 1)">
+    <!-- Top chopstick rotates inwards -->
+    <line x1="4" y1="35.5" x2="35" y2="1" stroke="#111" stroke-width="3.2" stroke-linecap="round"/>
+    <line x1="4" y1="35.5" x2="35" y2="1" stroke="#d4a373" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- Bottom chopstick rotates inwards -->
+    <line x1="4" y1="35.5" x2="39" y2="7" stroke="#111" stroke-width="3.2" stroke-linecap="round"/>
+    <line x1="4" y1="35.5" x2="39" y2="7" stroke="#c69963" stroke-width="1.8" stroke-linecap="round"/>
+  </g>
+</svg>

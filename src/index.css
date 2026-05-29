@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   THE CULINARY CONTROL PLANE — Design System
+   Two worlds: Organic Exterior (vintage Moebius) ↔ Utilitarian Interior (terminal/KDS)
+   All colors HSL.
+   ============================================================ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  :root {
+    color-scheme: dark;
+    /* ---- UTILITARIAN INTERIOR (dark grey) ---- */
+    --background: 192 11% 9%;             /* #15191a dark grey rgb(21, 25, 26) */
+    --foreground: 30 100% 98%;            /* #fff9f3 ivory text */
+
+    --surface: 30 31% 85%;                
+    --surface-2: 30 20% 90%;
+
+    --card: 192 11% 9%;
+    --card-foreground: 30 100% 98%;
+
+    --popover: 192 11% 9%;
+    --popover-foreground: 30 100% 98%;
+
+    --primary: 192 11% 9%;
+    --primary-foreground: 30 100% 98%;
+
+    --secondary: 192 11% 15%;
+    --secondary-foreground: 30 100% 98%;
+
+    --muted: 192 11% 15%;
+    --muted-foreground: 192 11% 60%;
+
+    --accent: 78 38% 74%;
+    --accent-foreground: 192 11% 9%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 100% 98%;                 /* light border */
+    --input: 30 100% 98%;
+    --ring: 78 38% 74%;
+
+    --radius: 0.25rem;
+
+    /* ---- SYSTEM ACCENTS (functional UI only) ---- */
+    --emerald: 78 38% 74%;                /* #c7d5a5 Mint Accent */
+    --info: 217 91% 60%;                  
+    --amber: 43 44% 48%;                  /* #af9145 Gold Accent */
+
+    /* ---- ORGANIC EXTERIOR illustration palette (hero/story only) ---- */
+    --paper: 30 100% 98%;                 /* #fff9f3 */
+    --ink: 192 11% 9%;                    /* #15191a */
+    --ocean: 91 13% 34%;                  /* #56624b Olive Green */
+    --sun: 51 97% 72%;                    
+    --pink: 339 100% 71%;                 
+    --night: 104 16% 9%;                  /* #171c14 Deep Forest Green */
+    --lilac: 333 14% 57%;                 
+    --herb: 142 32% 27%;                  
+
+    /* sidebar (unused but keep tokens valid) */
+    --sidebar-background: 30 100% 98%;
+    --sidebar-foreground: 192 11% 9%;
+    --sidebar-primary: 78 38% 74%;
+    --sidebar-primary-foreground: 192 11% 9%;
+    --sidebar-accent: 30 31% 85%;
+    --sidebar-accent-foreground: 192 11% 9%;
+    --sidebar-border: 192 11% 9%;
+    --sidebar-ring: 78 38% 74%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border/10;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Playwrite GB J', system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    cursor: url('/chopsticks.svg') 5 59, auto;
+  }
+
+  a, button, [role="button"], [role="tab"], input, select, textarea {
+    cursor: url('/chopsticks-grab.svg') 5 59, pointer;
+  }
+
+  body:active {
+    cursor: url('/chopsticks-grab.svg') 5 59, auto;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  button, a[role="button"], .btn {
+    @apply font-serif-display font-semibold;
+  }
+}
+
+@layer utilities {
+  .font-serif-display {
+    font-family: 'Caudex', Georgia, serif;
+    font-feature-settings: 'liga', 'dlig';
+  }
+  .font-mono-data {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-feature-settings: 'ss02', 'cv11';
+  }
+  .label-kicker {
+    font-family: 'Caudex', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .hairline {
+    border: 1px solid hsl(var(--border) / 0.1);
+  }
+  .hairline-b {
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+  }
+  .hairline-t {
+    border-top: 1px solid hsl(var(--border) / 0.1);
+  }
+  .hairline-r {
+    border-right: 1px solid hsl(var(--border) / 0.1);
+  }
+
+  /* halftone / paper backdrop for organic sections */
+  .paper-bg {
+    background-color: hsl(var(--paper));
+    background-image:
+      radial-gradient(hsl(var(--ink) / 0.18) 0.6px, transparent 0.6px),
+      radial-gradient(hsl(var(--ink) / 0.08) 0.6px, transparent 0.6px);
+    background-size: 6px 6px, 13px 13px;
+    background-position: 0 0, 3px 3px;
+  }
+
+  .terminal-cursor::after {
+    content: '▍';
+    margin-left: 2px;
+    color: hsl(var(--emerald));
+    animation: blink 1.1s steps(2, start) infinite;
+  }
+
+  @keyframes blink {
+    to { visibility: hidden; }
+  }
+
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(2deg); }
+  }
+  .anim-float-slow { animation: float-slow 9s ease-in-out infinite; }
+
+  /* subtle bob for scroll cues */
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+  .anim-bob { animation: bob 2.2s ease-in-out infinite; }
+
+  /* gentle blink for status dots — sparser than ping */
+  @keyframes blink-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .anim-blink-soft { animation: blink-soft 2.4s ease-in-out infinite; }
+
+  /* hovered sticker entrance + idle wobble */
+  @keyframes sticker-in {
+    0% { opacity: 0; transform: scale(0.8) rotate(-6deg); }
+    100% { opacity: 1; transform: scale(1) rotate(-2deg); }
+  }
+  .anim-sticker { animation: sticker-in 0.18s ease-out both; }
+
+  @keyframes fade-up {
+    0% { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-up { animation: fade-up 0.25s ease-out both; }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee { animation: marquee 35s linear infinite; }
+  .animate-marquee-fast { animation: marquee 17.5s linear infinite; }
+
+  /* respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .anim-float-slow,
+    .anim-bob,
+    .anim-blink-soft,
+    .anim-sticker,
+    .animate-fade-up,
+    .terminal-cursor::after {
+      animation: none !important;
+    }
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .vintage-frame {
+    --dent: 32px;
+    mask: 
+      radial-gradient(circle at 0 0, transparent var(--dent), black calc(var(--dent) + 1px)) top left,
+      radial-gradient(circle at 100% 0, transparent var(--dent), black calc(var(--dent) + 1px)) top right,
+      linear-gradient(black, black) bottom left,
+      linear-gradient(black, black) bottom right;
+    mask-size: 51% 51%;
+    mask-repeat: no-repeat;
+    -webkit-mask: 
+      radial-gradient(circle at 0 0, transparent var(--dent), black calc(var(--dent) + 1px)) top left,
+      radial-gradient(circle at 100% 0, transparent var(--dent), black calc(var(--dent) + 1px)) top right,
+      linear-gradient(black, black) bottom left,
+      linear-gradient(black, black) bottom right;
+    -webkit-mask-size: 51% 51%;
+    -webkit-mask-repeat: no-repeat;
+  }
+}

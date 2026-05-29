@@ -1,0 +1,26 @@
+name = "fampam-restaurant"
+compatibility_date = "2024-05-26"
+main = "src/worker.ts"
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fampam-db"
+database_id = "879190b3-c0e1-47db-801d-b59beab1cfc9"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "fampam-assets"
+
+[vars]
+ADMIN_EMAIL = "admin@fampam.de"
+ADMIN_PASSWORD = "Fampam@123"
+# JWT_SECRET = "..." # Set this via Cloudflare Dashboard or .dev.vars
+RESEND_API_KEY = "re_MPRiKKgz_DUAo9zPXNtWXMW1UTHkuCZA1"
+
+[[send_email]]
+name = "SEND_EMAIL"
